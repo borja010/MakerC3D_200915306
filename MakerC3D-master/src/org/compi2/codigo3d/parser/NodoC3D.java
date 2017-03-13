@@ -1,4 +1,6 @@
 package org.compi2.codigo3d.parser;
+import java.util.List;
+import java.util.LinkedList;
 
 /**
  * Clase sencilla para sintetizar información entre producciones.
@@ -8,13 +10,45 @@ package org.compi2.codigo3d.parser;
  */
 public class NodoC3D {
     private String cad;
-
+    private String lv = "";
+    private String lf = "";
+       
     public NodoC3D(String cad) {
         this.cad = cad;
+    }
+    
+    public NodoC3D(){
     }
     
     public String getCad(){
         return cad;
     }
-        
+    
+     public String getLv() {
+        return lv;
+    }
+     
+    public String removeLv() {
+        String v = lv;
+        lv = "";
+        return v;
+    }
+    public void setLv(String lv) {
+        this.lv = lv;
+    }
+
+    public String getLf() {
+        return lf;
+    }
+    
+    public String removeLf() {
+        String f = lf;
+        lf = "";
+        return f;
+    }
+
+    public void setLf(String lf) {
+        this.lf = lf;
+    }
+    
 }

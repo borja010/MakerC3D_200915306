@@ -24,7 +24,7 @@ action code
 
 terminal String ID, ENTERO, DECIMAL;
 terminal TokenC3D MAS, MENOS, MULT, DIV, POT, PAR_IZQ, PAR_DER, IGUAL_IGUAL, DIFERENTE, MAYOR, MENOR, MENOR_IGUAL, MAYOR_IGUAL, AND, OR, NOT;
-nonterminal NodoC3D inicial, expresion, relacional, logico;
+nonterminal NodoC3D inicial, expresion, logico;
 nonterminal String signo_relacional;
 
 precedence left OR;
@@ -39,36 +39,44 @@ start with inicial;
 inicial     ::= {: ControlC3D.reiniciar(); :} logico:log 
                     {: 
                         RESULT = log;
-                        ControlC3D.agregarC3D("//Último valor: " + log.getCad());
+						if(log.getCad() != null){
+							ControlC3D.agregarC3D("//Último valor: " + log.getCad());
+						}else{
+							ControlC3D.agregarC3D("//Etiqueta(s) de verdadero: " + log.removeLv() + "\n");
+							ControlC3D.agregarC3D("//Etiqueta(s) de falso: " + log.removeLf() + "\n");
+						}
+                        
                     :};
 
-logico  ::= logico:izq OR logico:der
+logico  ::= logico:izq OR{:ControlC3D.agregarC3D(izq.removeLf() + ":\n");:} logico:der
 				{:
-					String temp = ControlC3D.generaTemp();
-					String c3d = temp + " = " + izq.getCad() + " || " + der.getCad() + ";\n";
-					ControlC3D.agregarC3D(c3d);
-					RESULT = new NodoC3D(temp); 
+					RESULT = new NodoC3D();
+					RESULT.setLv(izq.getLv() + " " + der.getLv());
+					RESULT.setLf(izq.getLf() + " " + der.getLf());
 				:}
-		| logico:izq AND logico:der
+		| logico:izq AND{:ControlC3D.agregarC3D(izq.removeLv() + ":\n");:} logico:der
 				{:
-					String temp = ControlC3D.generaTemp();
-					String c3d = temp + " = " + izq.getCad() + " && " + der.getCad() + ";\n";
-					ControlC3D.agregarC3D(c3d);
-					RESULT = new NodoC3D(temp); 
+					RESULT = new NodoC3D();
+					RESULT.setLv(izq.getLv() + " " + der.getLv());
+					RESULT.setLf(izq.getLf() + " " + der.getLf());
 				:}
 		| NOT logico:log
 				{:
-					String temp = ControlC3D.generaTemp();
-					String c3d = temp + " = ! " + log.getCad() + ";\n";
-					ControlC3D.agregarC3D(c3d);
-					RESULT = new NodoC3D(temp); 
+					RESULT = new NodoC3D();
+					RESULT.setLf(log.removeLv());
+					RESULT.setLv(log.removeLf	());
 				:}		
 		| expresion:izq signo_relacional:rel expresion:der
 				{:
-					String temp = ControlC3D.generaTemp();
-					String c3d = temp + " = " + izq.getCad() + rel + der.getCad() + ";\n";
-					ControlC3D.agregarC3D(c3d);
-					RESULT = new NodoC3D(temp); 
+					RESULT = new NodoC3D();
+					RESULT.setLv(ControlC3D.generarEtiqueta());
+					RESULT.setLf(ControlC3D.generarEtiqueta());
+					ControlC3D.agregarC3D("if " + izq.getCad() + rel + der.getCad() + " then goto " + RESULT.getLv() + ";\n");
+					ControlC3D.agregarC3D("goto " + RESULT.getLf() + ";\n");
+				:} 
+		| expresion:exp
+				{:
+					RESULT  = exp;
 				:};
 
 signo_relacional ::= IGUAL_IGUAL
